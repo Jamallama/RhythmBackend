@@ -1,0 +1,26 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "mode": { "type": "STRING", "enum": ["song_debrief", "session_debrief", "chat"] },
+    "tier": { "type": "STRING", "enum": ["A", "B", "mixed"], "nullable": true },
+    "coaching_focus": { "type": "STRING", "enum": ["timing_bias", "timing_spread", "calibration_check", "density", "recovery_after_miss", "fatigue", "none"] },
+    "speech": { "type": "STRING" },
+    "phone_text": { "type": "ARRAY", "items": { "type": "STRING" } },
+    "drill": { "type": "STRING", "nullable": true },
+    "next_target": { "type": "STRING", "nullable": true },
+    "focus_section": {
+      "type": "OBJECT",
+      "nullable": true,
+      "properties": {
+        "start_s": { "type": "INTEGER" },
+        "end_s": { "type": "INTEGER" },
+        "reason": { "type": "STRING" }
+      },
+      "required": ["start_s", "end_s", "reason"]
+    },
+    "data_notes": { "type": "ARRAY", "items": { "type": "STRING" } },
+    "confidence": { "type": "STRING", "enum": ["low", "medium", "high"] },
+    "evidence_basis": { "type": "STRING", "enum": ["meta_analysis", "lab_consensus", "mixed_evidence", "practice_convention", "game_heuristic", "none"] }
+  },
+  "required": ["mode", "coaching_focus", "speech", "phone_text", "data_notes", "confidence", "evidence_basis"]
+}

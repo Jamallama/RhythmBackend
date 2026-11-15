@@ -1,0 +1,24 @@
+@RhythmBackend_HostAddress = http://localhost:5248
+
+GET {{RhythmBackend_HostAddress}}/
+Accept: application/json
+
+###
+
+POST {{RhythmBackend_HostAddress}}/api/results
+Content-Type: application/json
+
+{
+  "sessionId": "test-session-1",
+  "gameId": 1,
+  "songId": 1,
+  "difficulty": 2,
+  "gameTimeMs": 120000,
+  "bpm": 120,
+  "totalNoteCount": 400,
+  "score": 850000,
+  "accuracy": 92.5,
+  "averageLatencyMs": 35
+}
+
+###
