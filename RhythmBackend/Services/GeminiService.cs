@@ -108,7 +108,7 @@ public class GeminiService
         var payload = new
         {
             mode = "song_debrief",
-            question = "Analyze this one validated rhythm-game run and return one grounded, actionable song-debrief paragraph. The speech field must be 60 to 90 words, with no links or bracketed citations. Include one concrete practice action and one next target. Use only measurements present in the CSVs; treat blank measurements as unavailable. Always write measured values with digits, including BPM, milliseconds, percentages, hit counts, and seconds; never spell those numbers out. Convert millisecond timestamps into user-facing seconds or m:ss time, while keeping focus_section values in integer seconds.",
+            question = "Analyze this one validated rhythm-game run and return one grounded, actionable song-debrief paragraph for text-to-speech. The speech field must be 60 to 90 words, with no links or bracketed citations. Include one concrete practice action and one next target. Use only measurements present in the CSVs; treat blank measurements as unavailable. Use digits for values, but spell out spoken units as full words: say milliseconds, seconds, minutes, percent, and hits rather than abbreviations. Convert millisecond timestamps into natural spoken time such as 4 seconds or 1 minute 53 seconds, while keeping focus_section values in integer seconds.",
             tier = "A",
             runs = new[]
             {
@@ -143,6 +143,44 @@ public class GeminiService
         };
 
         return GenerateReplyAsync(payload, "song_debrief", "A", cancellationToken);
+    }
+
+    public Task<CoachResponse> CoachSessionAsync(
+        IReadOnlyList<(Sessions.RunManifest Run, string SummaryCsv)> runs,
+        CancellationToken cancellationToken = default)
+    {
+        var payload = new
+        {
+            mode = "session_debrief",
+            question = "Review progress across these completed song attempts. Return two concise spoken paragraphs: first summarize the song-to-song trend, then give one high-level practice priority and what to compare next. Use digits for measured values and full unit names in speech.",
+            tier = "mixed",
+            runs = runs.Select(item => new
+            {
+                source = "validated_session_runs",
+                tier = "A",
+                song = new
+                {
+                    game_id = item.Run.GameId,
+                    song_id = item.Run.SongId,
+                    chart_id = item.Run.ChartId,
+                    sample_interval_sec = item.Run.SampleIntervalSec,
+                    autoplay = item.Run.Autoplay,
+                    successful_hit_count = item.Run.SuccessfulHitCount,
+                    summary_csv = item.SummaryCsv
+                },
+                facts = new
+                {
+                    data_notes = new[] { "Compare runs cautiously; songs are not directly comparable unless their supplied metadata supports comparison." }
+                }
+            }).ToArray(),
+            session = new
+            {
+                song_count = runs.Count,
+                data_notes = new[] { "Session facts are limited to the completed runs supplied in this request." }
+            }
+        };
+
+        return GenerateReplyAsync(payload, "session_debrief", "mixed", cancellationToken);
     }
 
     private async Task<CoachResponse> GenerateReplyAsync(

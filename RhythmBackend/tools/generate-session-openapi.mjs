@@ -55,6 +55,9 @@ const paths = {
   [`${runPath}/coach`]: { post: op('coachRun', 'Read a completed run and send its validated CSVs to Gemini for song coaching', 'ReadBearer', {
     200: response('Structured Gemini coaching response', ref('CoachRunResponse')), 502: response('Gemini rejected or could not complete coaching', ref('Error'))
   }, [sessionParameter, runParameter]) },
+  [`${sessionPath}/coach`]: { post: op('coachSession', 'Summarize progress across the completed runs in a session', 'ReadBearer', {
+    200: response('Structured Gemini session coaching response', ref('CoachSessionResponse')), 502: response('Gemini rejected or could not complete coaching', ref('Error'))
+  }, [sessionParameter]) },
   '/sessions/{session_id}/': { get: {
     operationId: 'sessionLanding', summary: 'QR entry only; no data retrieval, redemption, or credential echo', security: [],
     parameters: [sessionParameter, { name: 'key', in: 'query', required: true, schema: key, description: 'Read capability; never use this query parameter on /v1 routes' }],
@@ -92,6 +95,7 @@ const spec = {
       RunPage: object({ session_id: id, expires_at: timestamp, runs: { type: 'array', items: ref('Run') },
         next_after_sequence: { type: 'integer', format: 'int64', minimum: 0 }, has_more: { type: 'boolean' } }),
       CoachRunResponse: object({ session_id: id, run_id: id, coaching: object({}) })
+      ,CoachSessionResponse: object({ session_id: id, coaching: object({}) })
     }
   }
 };

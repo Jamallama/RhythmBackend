@@ -158,6 +158,20 @@ Display `coaching.speech` as the main paragraph, `phone_text` as short UI lines,
 and optionally speak `speech` with the existing `Speaker`. The response is not
 persisted by the backend; the app should save it if coaching history is desired.
 
+### Request a session debrief
+
+After several runs are available, request a cross-song report:
+
+```http
+POST /v1/sessions/{session_id}/coach
+Authorization: Bearer <session_key>
+```
+
+The request has no body. The response uses `mode: "session_debrief"` and returns
+two spoken paragraphs: the first describes the song-to-song trend and the second
+gives one high-level practice priority and comparison for the next session. Do
+not present this as a detailed replay of the latest song.
+
 Autoplay runs may be retrieved, but must not be described as player performance.
 
 ## CSV V2 requirements

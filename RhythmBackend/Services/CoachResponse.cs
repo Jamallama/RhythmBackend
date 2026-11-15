@@ -16,6 +16,12 @@ public sealed record CoachResponse
     [JsonPropertyName("speech")]
     public required string Speech { get; init; }
 
+    [JsonPropertyName("what_went_well")]
+    public string? WhatWentWell { get; init; }
+
+    [JsonPropertyName("observations")]
+    public required Observation[] Observations { get; init; }
+
     [JsonPropertyName("phone_text")]
     public required string[] PhoneText { get; init; }
 
@@ -37,6 +43,11 @@ public sealed record CoachResponse
     [JsonPropertyName("evidence_basis")]
     public required string EvidenceBasis { get; init; }
 }
+
+public sealed record Observation(
+    [property: JsonPropertyName("label")] string Label,
+    [property: JsonPropertyName("value")] string Value,
+    [property: JsonPropertyName("interpretation")] string Interpretation);
 
 public sealed record FocusSection(
     [property: JsonPropertyName("start_s")] int StartS,

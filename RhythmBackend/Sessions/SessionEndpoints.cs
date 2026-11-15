@@ -196,6 +196,27 @@ public static class SessionEndpoints
             }
         });
 
+        routes.MapPost("/sessions/{session_id}/coach", async (
+            HttpContext ctx, SessionService service, GeminiService gemini, string session_id) =>
+        {
+            try
+            {
+                var state = await service.ReadAsync(session_id, Bearer(ctx), upload: false, ctx.RequestAborted);
+                var runs = new List<(RunManifest Run, string SummaryCsv)>();
+                foreach (var run in state.Runs.OrderBy(run => run.Sequence))
+                {
+                    var summary = await service.DownloadAsync(session_id, run.RunId, "summary.csv", Bearer(ctx), ctx.RequestAborted);
+                    runs.Add((run, Encoding.UTF8.GetString(summary)));
+                }
+                var coaching = await gemini.CoachSessionAsync(runs, ctx.RequestAborted);
+                return Json(new { session_id, coaching });
+            }
+            catch (CoachResponseException ex)
+            {
+                return Error(502, ex.Code, ex.Message);
+            }
+        });
+
         routes.MapGet("/sessions/{session_id}/runs/{run_id}/{filename}", async (
             HttpContext ctx, SessionService service, string session_id, string run_id, string filename) =>
         {
