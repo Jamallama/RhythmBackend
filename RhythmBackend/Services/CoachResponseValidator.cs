@@ -28,7 +28,7 @@ public static class CoachResponseValidator
         var (min, max) = mode switch
         {
             "song_debrief" => (30, 120),
-            "session_debrief" => (60, 180),
+            "session_debrief" => (30, 180),
             "chat" => (5, 150),
             _ => throw new InvalidOperationException("Unknown coaching mode.")
         };
