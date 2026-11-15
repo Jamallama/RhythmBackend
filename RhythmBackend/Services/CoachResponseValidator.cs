@@ -25,7 +25,7 @@ public static class CoachResponseValidator
         int words = output.Speech.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Length;
         var (min, max) = mode switch
         {
-            "song_debrief" => (30, 60),
+            "song_debrief" => (60, 90),
             "session_debrief" => (40, 90),
             "chat" => (5, 150),
             _ => throw new InvalidOperationException("Unknown coaching mode.")
@@ -38,9 +38,9 @@ public static class CoachResponseValidator
                 "The coach reply did not meet the required length or content rules.");
 
         // Neither current endpoint supplies a series or session calibration facts.
-        if (output.FocusSection is not null
-            || output.CoachingFocus is "timing_spread" or "density" or "recovery_after_miss" or "fatigue"
-                or "calibration_check")
+        bool unsupportedForTier = output.CoachingFocus is "recovery_after_miss" or "fatigue" or "calibration_check"
+            || tier != "A" && output.CoachingFocus is "timing_spread" or "density";
+        if (tier != "A" && output.FocusSection is not null || unsupportedForTier)
             throw new CoachResponseException("coach_unsupported_facts",
                 "The coach reply used analysis that requires unavailable performance data.");
     }

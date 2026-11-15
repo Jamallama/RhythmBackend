@@ -7,7 +7,7 @@ var valid = new CoachResponse
     Mode = "song_debrief",
     Tier = "B",
     CoachingFocus = "timing_bias",
-    Speech = "Your average timing was positive, which means late. Focus on aligning your taps with the beat. Practice tapping along steadily, then replay the song with the goal of bringing your average offset closer to zero.",
+    Speech = "Your average timing was positive, which means late. Focus on aligning your taps with the beat. Practice tapping along steadily, then replay the song with the goal of bringing your average offset closer to zero. During the next attempt, listen for the beat before each phrase, keep your hands relaxed, and review whether the timing moves consistently toward the center.",
     PhoneText = ["Positive offset means late."],
     DataNotes = ["Summary only; section data is not available."],
     Drill = "Tap steadily with the beat.",
@@ -29,7 +29,7 @@ void Reject(CoachResponse output, string name)
 Reject(valid with { Mode = "chat" }, "wrong mode");
 Reject(valid with { Tier = "A" }, "wrong tier");
 Reject(valid with { Speech = "Too short." }, "short speech");
-Reject(valid with { Speech = string.Join(' ', Enumerable.Repeat("word", 61)) }, "long speech");
+Reject(valid with { Speech = string.Join(' ', Enumerable.Repeat("word", 91)) }, "long speech");
 Reject(valid with { Speech = valid.Speech + " [1]" }, "citation");
 Reject(valid with { Speech = valid.Speech + " https://example.com" }, "link");
 Reject(valid with { FocusSection = new(1, 2, "unsupported") }, "section without series");
@@ -40,7 +40,7 @@ Reject(valid with { EvidenceBasis = "invented" }, "evidence enum");
 Reject(valid with { PhoneText = null! }, "null phone text");
 Reject(valid with { DataNotes = [null!] }, "null data note");
 
-foreach (int words in new[] { 30, 60 })
+foreach (int words in new[] { 60, 90 })
 {
     CoachResponseValidator.Validate(valid with { Speech = string.Join(' ', Enumerable.Repeat("word", words)) }, "song_debrief", "B");
     checks++;

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.RateLimiting;
+using RhythmBackend.Services;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
@@ -172,6 +173,27 @@ public static class SessionEndpoints
                 next_after_sequence = page.LastOrDefault()?.Sequence ?? after,
                 has_more = all.Length > page.Length
             });
+        });
+
+        routes.MapPost("/sessions/{session_id}/runs/{run_id}/coach", async (
+            HttpContext ctx, SessionService service, GeminiService gemini, string session_id, string run_id) =>
+        {
+            try
+            {
+                var state = await service.ReadAsync(session_id, Bearer(ctx), upload: false, ctx.RequestAborted);
+                SessionService.RequireId(run_id);
+                var run = state.Runs.Find(candidate => candidate.RunId == run_id)
+                    ?? throw new SessionApiException(404, "run_not_found", "Completed attempt was not found.");
+                var series = await service.DownloadAsync(session_id, run_id, "series.csv", Bearer(ctx), ctx.RequestAborted);
+                var summary = await service.DownloadAsync(session_id, run_id, "summary.csv", Bearer(ctx), ctx.RequestAborted);
+                var coaching = await gemini.CoachCsvAsync(run,
+                    Encoding.UTF8.GetString(series), Encoding.UTF8.GetString(summary), ctx.RequestAborted);
+                return Json(new { session_id, run_id, coaching });
+            }
+            catch (CoachResponseException ex)
+            {
+                return Error(502, ex.Code, ex.Message);
+            }
         });
 
         routes.MapGet("/sessions/{session_id}/runs/{run_id}/{filename}", async (

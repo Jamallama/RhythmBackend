@@ -52,6 +52,9 @@ const paths = {
   [runPath]: { put: op('uploadRun', 'Persist both CSVs, then atomically publish an immutable completed attempt; no Gemini dependency', 'UploadBearer', {
     201: response('First commit', ref('UploadReceipt')), 200: response('Identical parsed metadata and exact CSV byte retry', ref('UploadReceipt'))
   }, [sessionParameter, runParameter], 'UploadRun') },
+  [`${runPath}/coach`]: { post: op('coachRun', 'Read a completed run and send its validated CSVs to Gemini for song coaching', 'ReadBearer', {
+    200: response('Structured Gemini coaching response', ref('CoachRunResponse')), 502: response('Gemini rejected or could not complete coaching', ref('Error'))
+  }, [sessionParameter, runParameter]) },
   '/sessions/{session_id}/': { get: {
     operationId: 'sessionLanding', summary: 'QR entry only; no data retrieval, redemption, or credential echo', security: [],
     parameters: [sessionParameter, { name: 'key', in: 'query', required: true, schema: key, description: 'Read capability; never use this query parameter on /v1 routes' }],
@@ -87,7 +90,8 @@ const spec = {
       UploadReceipt: object({ session_id: id, ...completed }),
       Run: object({ ...completed, ...runMetadata, files: object({ series: text, summary: text }) }),
       RunPage: object({ session_id: id, expires_at: timestamp, runs: { type: 'array', items: ref('Run') },
-        next_after_sequence: { type: 'integer', format: 'int64', minimum: 0 }, has_more: { type: 'boolean' } })
+        next_after_sequence: { type: 'integer', format: 'int64', minimum: 0 }, has_more: { type: 'boolean' } }),
+      CoachRunResponse: object({ session_id: id, run_id: id, coaching: object({}) })
     }
   }
 };

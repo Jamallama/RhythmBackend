@@ -27,6 +27,7 @@ locally; it does not need to open the landing page to parse the QR.
 | --- | --- | --- |
 | `POST /v1/sessions` | Both newly generated keys in JSON | 201 first registration; 200 identical retry |
 | `PUT /v1/sessions/{session_id}/runs/{run_id}` | Upload bearer | 201 first commit; 200 identical retry |
+| `POST /v1/sessions/{session_id}/runs/{run_id}/coach` | Read bearer | 200 structured Gemini coaching for the validated CSVs |
 | `GET /v1/sessions/{session_id}/runs` | Read bearer | 200, including empty sessions |
 | `GET /v1/sessions/{session_id}/runs/{run_id}/series.csv` | Read bearer | 200 exact UTF-8 CSV |
 | `GET /v1/sessions/{session_id}/runs/{run_id}/summary.csv` | Read bearer | 200 exact UTF-8 CSV |
@@ -157,11 +158,22 @@ data as unsuitable for exact coaching claims. The backend cannot verify that
 Unity excluded misses from already-aggregated latency; Unity must fix this before
 asserting `successful_hits_only_v1`.
 
-This adapter persists/transports data. It does **not** automatically generate or
-persist Gemini coaching, implement session debriefs, or make `/api/chat` remember
-downloaded runs. The existing coach still receives summary JSON through its old
-endpoint; its validator still rejects per-section/session analysis. The phone's
-ingestion and a later facts/coaching adapter must connect these flows explicitly.
+### CSV coaching
+
+After a run has been uploaded, the phone or frontend can request coaching with
+the read capability:
+
+```http
+POST /v1/sessions/{session_id}/runs/{run_id}/coach
+Authorization: Bearer <session_key>
+```
+
+The backend re-authorizes the session, reads the committed CSVs, and sends the
+validated CSV text to Gemini as data, never as instructions. Gemini returns the
+same structured `CoachResponse` contract used by the legacy coaching routes.
+The response is not persisted; clients should retain it if they need a coaching
+history. Autoplay runs remain retrievable but should not be coached as player
+performance. Uploading a run alone does not call Gemini.
 
 ## Errors, limits and lifecycle
 
