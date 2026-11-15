@@ -1,10 +1,14 @@
 ﻿
 using RhythmBackend.Services;
+using RhythmBackend.Sessions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<GeminiService>();
+builder.AddSessionApi();
 
 var app = builder.Build();
+app.UseSessionApi();
+app.MapSessionApi();
 
 // Test whether the backend is running
 app.MapGet("/", () =>

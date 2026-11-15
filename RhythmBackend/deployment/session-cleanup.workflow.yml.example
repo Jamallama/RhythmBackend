@@ -1,0 +1,32 @@
+# Copy into the repository's .github/workflows after configuring Actions secrets.
+# Schedules are best-effort: use monitored Azure scheduling for strict retention.
+name: Rhythm session cleanup
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+permissions: {}
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Request cleanup without logging credentials
+        shell: pwsh
+        env:
+          RHYTHM_API_BASE: ${{ secrets.RHYTHM_API_BASE }}
+          RHYTHM_MAINTENANCE_KEY: ${{ secrets.RHYTHM_MAINTENANCE_KEY }}
+        run: |
+          $base = [uri]$env:RHYTHM_API_BASE
+          if ($base.Scheme -ne 'https' -or $base.UserInfo -or $base.Query -or $base.Fragment -or $base.AbsolutePath -ne '/') {
+            throw 'Configure a plain HTTPS API origin.'
+          }
+          if ($env:RHYTHM_MAINTENANCE_KEY -notmatch '\A[A-Za-z0-9_-]{32}\z') {
+            throw 'Configure the maintenance secret.'
+          }
+          try {
+            $null = Invoke-RestMethod -Method Post -Uri ($base.GetLeftPart([System.UriPartial]::Authority) + '/internal/session-cleanup') -Headers @{Authorization = 'Bearer ' + $env:RHYTHM_MAINTENANCE_KEY} -TimeoutSec 150 -MaximumRedirection 0
+          } catch {
+            throw 'Cleanup failed. Check service availability and scheduler secrets; retry and alert if it persists.'
+          }
+          Write-Output 'Session cleanup completed.'
