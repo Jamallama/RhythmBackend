@@ -108,7 +108,7 @@ public class GeminiService
         var payload = new
         {
             mode = "song_debrief",
-            question = "Analyze this one validated rhythm-game run and return one grounded, actionable song-debrief paragraph. The speech field must be 60 to 90 words, with no links or bracketed citations. Include one concrete practice action and one next target. Use only measurements present in the CSVs; treat blank measurements as unavailable.",
+            question = "Analyze this one validated rhythm-game run and return one grounded, actionable song-debrief paragraph. The speech field must be 60 to 90 words, with no links or bracketed citations. Include one concrete practice action and one next target. Use only measurements present in the CSVs; treat blank measurements as unavailable. Always write measured values with digits, including BPM, milliseconds, percentages, hit counts, and seconds; never spell those numbers out. Convert millisecond timestamps into user-facing seconds or m:ss time, while keeping focus_section values in integer seconds.",
             tier = "A",
             runs = new[]
             {

@@ -29,14 +29,25 @@ public static class RunCsvValidator
         for (int i = 0; i < names.Length; i++)
         {
             var cells = series[i].Split(',');
-            if (cells.Length != 2 || cells[0] != names[i]) Invalid("invalid_csv", "Series metadata rows are missing or out of order.");
+            if (cells.Length != 2 || (i < 4 && cells[0] != names[i])
+                || (i == 4 && cells[0] is not ("sample_interval_sec" or "format_version")))
+                Invalid("invalid_csv", "Series metadata rows are missing or out of order.");
             metadata[i] = cells[1];
         }
         if (Integer(metadata[0]) != run.GameId || Integer(metadata[1]) != run.SongId
-            || Integer(metadata[2]) != run.ChartId || Integer(metadata[4]) != run.SampleIntervalSec)
+            || Integer(metadata[2]) != run.ChartId
+            || (series[4].StartsWith("sample_interval_sec,", StringComparison.Ordinal) && Integer(metadata[4]) != run.SampleIntervalSec))
             Invalid("metadata_mismatch", "Series identity or sampling interval differs from the upload envelope.");
         double nominalBpm = Number(metadata[3]);
         if (nominalBpm < 0) Invalid("invalid_csv", "BPM cannot be negative.");
+        if (series[4].StartsWith("format_version,", StringComparison.Ordinal))
+        {
+            if (metadata[4] != "2") Invalid("unsupported_format_version", "Only series format_version 2 is supported.");
+            ValidateV2(run, series, summary, nominalBpm);
+            return;
+        }
+        if (series[4] != "sample_interval_sec,1" && series[4] != "sample_interval_sec,2")
+            Invalid("invalid_csv", "Series metadata rows are missing or out of order.");
         if (series[5] != "game_time,percent_accuracy,avg_latency,bpm,nps,latency_spread")
             Invalid("invalid_csv", "Unexpected series header.");
 
@@ -93,6 +104,75 @@ public static class RunCsvValidator
             Invalid("invalid_csv", "Successful hit count is inconsistent with available series timing windows.");
         if (run.SuccessfulHitCount == 0 && values[7] != 0)
             Invalid("invalid_csv", "Zero successful hits requires the summary's documented zero-latency sentinel.");
+    }
+
+    private static void ValidateV2(UploadRunRequest run, List<string> series, List<string> summary, double nominalBpm)
+    {
+        if (series[5] != "note_index,time_ms,lane,judgement,accuracy_delta,latency_ms,nps,bpm,combo,std_ms")
+            Invalid("invalid_csv", "Unexpected v2 series header.");
+        if (summary.Count != 1 || summary[0].Split(',').Length != 8)
+            Invalid("invalid_csv", "Summary must have eight fields and no header.");
+
+        var values = summary[0].Split(',').Select(Integer).ToArray();
+        if (values[0] is < 0 or > 99 || values[1] is < 0 or > 999 || values[2] is < 1 or > 4
+            || values[3] is < 0 or > 999999 || values[4] is < 0 or > 999
+            || values[5] is < 0 or > 3000 || values[6] is < 0 or > 1_000_000)
+            Invalid("invalid_csv", "Summary fields exceed the documented format ranges.");
+        long expectedGame = run.SummaryExceedsFormatRange ? Math.Min(run.GameId, 99) : run.GameId;
+        long expectedSong = run.SummaryExceedsFormatRange ? Math.Min(run.SongId, 999) : run.SongId;
+        double expectedBpm = run.SummaryExceedsFormatRange ? Math.Min(nominalBpm, 999) : nominalBpm;
+        if (values[0] != expectedGame || values[1] != expectedSong || Math.Abs(values[4] - expectedBpm) > 0.500001)
+            Invalid("metadata_mismatch", "Summary identity or rounded BPM differs from series/envelope values beyond permitted clamps.");
+
+        int previousIndex = -1;
+        int previousCombo = 0;
+        int successful = 0;
+        var offsets = new List<double>();
+        for (int i = 6; i < series.Count; i++)
+        {
+            var row = series[i].Split(',');
+            if (row.Length != 10) Invalid("invalid_csv", "Each v2 series record must have ten fields.");
+            int noteIndex = checked((int)Integer(row[0]));
+            if (noteIndex < 0 || noteIndex <= previousIndex) Invalid("invalid_csv", "V2 note indexes must be unique and increasing.");
+            previousIndex = noteIndex;
+            if (Integer(row[1]) < 0 || Integer(row[2]) < 0) Invalid("invalid_csv", "V2 note time and lane must be nonnegative.");
+            string judgement = row[3];
+            if (judgement is not ("P" or "G" or "M")) Invalid("invalid_csv", "V2 judgement must be P, G, or M.");
+            Number(row[4]);
+            long nps = Integer(row[6]);
+            double bpm = Number(row[7]);
+            int combo = checked((int)Integer(row[8]));
+            if (nps < 0 || bpm < 0 || combo < 0) Invalid("invalid_csv", "V2 NPS, BPM, and combo must be nonnegative.");
+            if (judgement == "M")
+            {
+                if (combo != 0) Invalid("invalid_csv", "A v2 Miss row must reset combo to zero.");
+            }
+            else if (combo != previousCombo + 1)
+                Invalid("invalid_csv", "V2 P/G rows must increment combo by one.");
+            previousCombo = combo;
+
+            double? latency = OptionalInteger(row[5]);
+            double? spread = OptionalNumber(row[9]);
+            if (spread is < 0) Invalid("invalid_csv", "V2 standard deviation cannot be negative.");
+            if (judgement is "P" or "G")
+            {
+                if (latency.HasValue) { successful++; offsets.Add(latency.Value); }
+            }
+            if (offsets.Count < 2 && spread.HasValue)
+                Invalid("invalid_csv", "V2 std_ms must remain blank until two successful offsets exist.");
+            if (offsets.Count >= 2)
+            {
+                double mean = offsets.Average();
+                double variance = offsets.Sum(value => Math.Pow(value - mean, 2)) / offsets.Count;
+                double expectedSpread = Math.Round(Math.Sqrt(variance), 1, MidpointRounding.AwayFromZero);
+                if (!spread.HasValue || Math.Abs(spread.Value - expectedSpread) > 0.051)
+                    Invalid("invalid_csv", "V2 std_ms does not match the running successful-hit population spread.");
+            }
+        }
+        if (successful != run.SuccessfulHitCount)
+            Invalid("invalid_csv", "Successful hit count does not match P/G rows with nonempty latency.");
+        if (successful == 0 && values[7] != 0)
+            Invalid("invalid_csv", "Zero successful hit count requires the summary's documented zero-latency sentinel.");
     }
 
     public static string Digest(UploadRunRequest run)
@@ -159,5 +239,6 @@ public static class RunCsvValidator
     }
 
     private static double? OptionalNumber(string text) => string.IsNullOrWhiteSpace(text) ? null : Number(text);
+    private static double? OptionalInteger(string text) => string.IsNullOrWhiteSpace(text) ? null : Integer(text);
     private static void Invalid(string code, string message) => throw new SessionApiException(422, code, message);
 }
