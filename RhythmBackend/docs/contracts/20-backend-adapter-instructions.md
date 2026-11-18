@@ -1,6 +1,6 @@
 # Backend developer adapter instructions
 
-Implement a session adapter at the supplied [Azure backend](https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net/) so the game can upload attempts and the glasses phone client can retrieve both CSVs after one session QR scan.
+Implement a session adapter at the deployer's Azure backend (`https://YOUR-APP.azurewebsites.net/`) so the game can upload attempts and the phone client can retrieve both CSVs after one session QR scan.
 
 Read the [shared adapter contract](19-rhythm-session-adapter.md) first. **[assumed] Its API routes and lifecycle values are a proposal, not a description of confirmed deployed behavior.** [docs] The required session/attempt distinction and existing CSV formats come from the Owner and current engine source. Do not implement the disabled per-run Worker contract.
 

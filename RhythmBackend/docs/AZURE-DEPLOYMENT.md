@@ -64,7 +64,7 @@ exception bodies; inspect storage settings without enabling credential capture.
 From PowerShell 7:
 
 ```powershell
-.\tools\Test-SessionApi.ps1 -BaseUrl 'https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net'
+.\tools\Test-SessionApi.ps1 -BaseUrl 'https://YOUR-APP.azurewebsites.net'
 ```
 
 This creates a disposable session, commits song A, a replay and song B, checks

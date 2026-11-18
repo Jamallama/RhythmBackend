@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net"
+      "url": "https://YOUR-APP.azurewebsites.net"
     }
   ],
   "paths": {

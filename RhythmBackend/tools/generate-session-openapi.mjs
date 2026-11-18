@@ -75,7 +75,7 @@ const spec = {
     title: 'Rhythm session adapter', version: '1.0.0',
     description: 'Session contract v1. All protected responses are no-store. HTTPS is mandatory outside local development. Keys are independent session-scoped capabilities, not proof of game authenticity. Legacy /api/chat and /api/results are separate and not described here. Default lifetime 24 hours; cleanup removes payloads after expiry/revocation and session metadata within the following 24 hours, retaining an ID-only non-reversible anti-reuse tombstone. QR landing requires operator confirmation of external-log redaction. Rate limits are per running app instance; use one instance or an external distributed limiter.'
   },
-  servers: [{ url: 'https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net' }],
+  servers: [{ url: 'https://YOUR-APP.azurewebsites.net' }],
   paths,
   components: {
     securitySchemes: {

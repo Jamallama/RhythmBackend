@@ -13,9 +13,9 @@ Gemini coaching.
 | WebGL repository | [SeaweedBrainn/MusicalSpartans.github.io](https://github.com/SeaweedBrainn/MusicalSpartans.github.io) |
 | Live RhythmEngine WebGL app | [Play RhythmEngine](https://seaweedbrainn.github.io/MusicalSpartans.github.io/) |
 | GitHub Pages origin | [seaweedbrainn.github.io](https://seaweedbrainn.github.io) |
-| Production API | [Rhythm Backend](https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net) |
-| API health | [Health endpoint](https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net/health) |
-| API schema | [OpenAPI JSON](https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net/openapi.json) |
+| Production API | Your Azure App Service URL after deployment |
+| API health | `<your-api-base>/health` |
+| API schema | `<your-api-base>/openapi.json` |
 
 The Unity/RhythmEngine source is maintained separately from this backend. The
 public WebGL build is linked above; add the Unity source repository when it is
@@ -50,7 +50,7 @@ backend; API keys are never placed in client applications.
 ## Production API
 
 ```text
-https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net
+https://YOUR-APP.azurewebsites.net
 ```
 
 Important routes:

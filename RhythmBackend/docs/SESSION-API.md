@@ -14,7 +14,7 @@ those assumptions for this implementation.
 ## Client configuration
 
 ```text
-ApiBaseUrl = https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net
+ApiBaseUrl = https://YOUR-APP.azurewebsites.net
 PublicClientUrl = <ApiBaseUrl>/sessions
 Production browser origin = https://seaweedbrainn.github.io
 ```

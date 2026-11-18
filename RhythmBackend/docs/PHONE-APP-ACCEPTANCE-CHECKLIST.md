@@ -2,7 +2,7 @@
 
 Use this checklist against the deployed API and the Android build.
 
-- [ ] The API base is `https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net`.
+- [ ] The API base is the deployer's Azure App Service HTTPS URL.
 - [ ] The QR scanner accepts only the expected HTTPS origin and `/sessions/{id}/?key=...` shape.
 - [ ] The scanned key is stored as the read key and never logged.
 - [ ] `GET /v1/sessions/{id}/runs` sends `Authorization: Bearer <session_key>`.

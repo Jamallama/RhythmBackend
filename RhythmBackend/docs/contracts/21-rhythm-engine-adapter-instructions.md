@@ -9,7 +9,7 @@ Read the [shared adapter contract](19-rhythm-session-adapter.md) first. **[assum
 The proposed values are:
 
 ```text
-ApiBaseUrl = https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net
+ApiBaseUrl = https://YOUR-APP.azurewebsites.net
 PublicClientUrl = <ApiBaseUrl>/sessions
 Registration = POST <ApiBaseUrl>/v1/sessions
 Upload = PUT <ApiBaseUrl>/v1/sessions/<session_id>/runs/<run_id>

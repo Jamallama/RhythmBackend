@@ -12,7 +12,7 @@ Gemini provides structured coaching.
 ## Current production host
 
 ```text
-https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net
+https://YOUR-APP.azurewebsites.net
 ```
 
 Production browser origin:

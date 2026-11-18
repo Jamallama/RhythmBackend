@@ -20,7 +20,7 @@ Developer instructions: [backend developer](20-backend-adapter-instructions.md) 
 ## Addresses and responsibilities
 
 ```text
-API_BASE = https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net
+API_BASE = https://YOUR-APP.azurewebsites.net
 PUBLIC_CLIENT_URL = <API_BASE>/sessions
 QR = <PUBLIC_CLIENT_URL>/<session_id>/?key=<session_key>
 ```

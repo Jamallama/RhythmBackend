@@ -10,9 +10,9 @@ Gemini coaching.
 - [Android app](https://github.com/SeaweedBrainn/MusicalSpartans)
 - [WebGL build repository](https://github.com/SeaweedBrainn/MusicalSpartans.github.io)
 - [Live RhythmEngine WebGL app](https://seaweedbrainn.github.io/MusicalSpartans.github.io/)
-- [Production API](https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net)
-- [API health](https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net/health)
-- [OpenAPI schema](https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net/openapi.json)
+- Production API: use your Azure App Service URL after deployment
+- API health: `<your-api-base>/health`
+- OpenAPI schema: `<your-api-base>/openapi.json`
 
 ## What it provides
 

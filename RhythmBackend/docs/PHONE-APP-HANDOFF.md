@@ -15,7 +15,7 @@ CSV files for each attempt, and request Gemini coaching.
 Production API:
 
 ```text
-https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net
+https://YOUR-APP.azurewebsites.net
 ```
 
 The backend is live and has been tested with the V2 per-note CSV contract.
@@ -58,7 +58,7 @@ Do not put Gemini, Azure, or upload credentials in the APK.
 Unity constructs this URL after the session registration acknowledgement:
 
 ```text
-https://rhythm-backend-emmanuel-hvfkdjhxfjc4d9a5.westus-01.azurewebsites.net/sessions/{session_id}/?key={session_key}
+https://YOUR-APP.azurewebsites.net/sessions/{session_id}/?key={session_key}
 ```
 
 The phone should parse the QR locally. It does not need to open the landing page.
